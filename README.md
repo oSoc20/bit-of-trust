@@ -1,6 +1,18 @@
 # Bit of Trust (BoT) Protocol
 
-**Disclaimer** - **This file is a draft, nothing written here is final.**
+**Disclaimer** - **This file is a draft, nothing written here is final or represents an end product.**
+
+## Introduction
+
+The BoT protocol attempts to build identifiers based on the relationships between people. This means the focus is no longer on the individuals in the system. An example of this in a current system is your handle on Twitter, which is a unique identifier on their platform. Instead, the BoT protocol focusses on relationships. For instance, Bob and Alice can declare that they are friends, and to the system they could be known as `bob-and-alice`, however there are no identifiers for the individuals Bob or Alice on their own. 
+
+> **Comment:** In the current description of the protocol, this does not exclude the use of individual identifiers as an implementation detail, but these are never public facing or addressable. See the subsection on ‘Device Identifiers’ for more details.
+
+We first discuss the system model that this protocol can operate on. That is, we are assuming an underlying Distributed Hash Table (DHT) in which we keep track of ‘trust identifiers’ and relate them to an RDF document describing the relationship in greater detail. This document contains a number of ‘device identifiers’. In the current version, these are public keys owned by individuals partaking in the relationship. Their primary use is to act as a lookup mechanism to retrieve the relationships somebody is part of. A secondary use, is their ability to act as a way to prove ownership over your device.
+
+> **Comment:** In the ideal case, we would not have any device identifiers in the first place. This is still a way to address individuals which is exactly what we are trying to avoid. If we do not have any device identifiers, we lack a way to talk about membership. This means we can not stop people from claiming they are part of a trust relationship when they are not, and there is no way to revoke their ability to use the trust identifier. This is discussed furter in the subsection on ‘Device Identifiers’.
+
+In the second part we discuss the protocol itself, and the syntax and semantics of the messages that will be exchanged between users. This is supposed to provide enough information to implement a working version of the protcol using your technology of choice.
 
 ## System Model
 
@@ -39,7 +51,7 @@ The idea behind distributed hash tables is that we can distribute this table ove
 
 In the interest of brevity, we will not tread into detail how DHTs are implemented here, as this would warrant the size of a book chapter or research paper. A good place to start is the [Chord paper](https://pdos.csail.mit.edu/papers/ton:chord/paper-ton.pdf), as this is the easiest one to understand.
 
-### What is being stored?
+### Storage Model
 
 The hash table approximately looks like the table below, where the keys are trust relationships and the device identifiers are stored inside a document.
 
@@ -59,7 +71,7 @@ The file `a2ca2c385.json` looks like this:
 }
 ```
 
-## Device Identifiers
+### Device Identifiers
 
 Device identifiers are based on asymmetric cryptography (more specifically: ECC?). Each user generates a random private key and derives a public key from it. The public key is used as their 'device identifier' on the network. They can use their private key to prove ownership of their public key.
 
@@ -67,9 +79,9 @@ Users are responsible for the safe-guarding of their private key, both from atta
 
 Note that a public (or private) key *alone* does not contain or point to any personally identifiable information (PII).
 
-(Public/private keys are an implementation detail and should never directly be shown to the user.)
+TODO: elaborate further
 
-## Trust Relationships
+### Trust Identifiers
 
 Trust relationships are relationships between a group of at least two 'devices'. A device is introduced to the network by setting up a trust relationship with an existing member.
 
@@ -81,7 +93,9 @@ Using hashes as identifiers makes it possible to identify (point at, talk about,
 
 The hash function to be used is (SHA-3? BLAKE2?), a cryptographic hash function.
 
-## Context
+TODO: elaborate further
+
+### Context
 
 Human relationships can mean different things to different people. For example, Alice might want to connect with Bob in the context of friendship, but Bob only considers Alice an acquaintance.
 
@@ -91,4 +105,4 @@ TODO: elaborate further
 
 ## Protocol
 
-TODO: (how do people establish trust relationships? / bootstrapping? )
+TODO
