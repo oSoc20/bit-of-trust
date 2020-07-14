@@ -91,7 +91,7 @@ They are thus structured as a Merkle tree, with hashes of device identifiers in 
 
 Using hashes as identifiers makes it possible to identify (point at, talk about, ...) one's latest known version (generation) of a whole tree without each device needing to store the whole tree.
 
-The hash function to be used is (SHA-3? BLAKE2?), a cryptographic hash function.
+The hash function to be used is BLAKE2b-256, a cryptographic hash function.
 
 TODO: elaborate further
 
