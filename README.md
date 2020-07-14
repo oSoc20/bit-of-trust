@@ -1,108 +1,172 @@
+![Bit of Trust](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/bot.png)
+
 # Bit of Trust (BoT) Protocol
 
-**Disclaimer** - **This file is a draft, nothing written here is final or represents an end product.**
+**Disclaimer** - **This file is a draft, nothing written here is final or represents an end
+product.**
 
 ## Introduction
 
-The BoT protocol attempts to build identifiers based on the relationships between people. This means the focus is no longer on the individuals in the system. An example of this in a current system is your handle on Twitter, which is a unique identifier on their platform. Instead, the BoT protocol focusses on relationships. For instance, Bob and Alice can declare that they are friends, and to the system they could be known as `bob-and-alice`, however there are no identifiers for the individuals Bob or Alice on their own. 
+The BoT protocol attempts to build identifiers based on the relationships between people. This
+means the focus is no longer on the individuals in the system. An example of this in a current
+system is your handle on Twitter, which is a unique identifier on their platform. Instead, the BoT
+protocol focusses on relationships. For instance, Bob and Alice can declare that they are friends,
+and to the system they could be known as `bob-and-alice`, however there are no identifiers for the
+individuals Bob or Alice on their own.
 
-> **Comment:** In the current description of the protocol, this does not exclude the use of individual identifiers as an implementation detail, but these are never public facing or addressable. See the subsection on ‘Trust Shards’ for more details.
+We start with a discussion of the system model behind this protocol, that means we will describe
+the data we store, and how we store it. The fundamental part of this system are relations, they are
+stored in [RDF](https://www.w3.org/TR/rdf-primer/) documents since they are extensible and allow us
+to define machine-interpretable semantics. We can access these RDF documents by associating them
+with a trust identifier, which represents a handle for a given relationship. A natural way to store
+mappings is a hash table, but this limits the scalability of the system to a single machine and we
+need much more scalability. Therefore we can opt for a Decentralised Hash Table (DHT) instead, this
+has the added benefit of reducing the amount of centralised components in the system.
 
-We first discuss the system model that this protocol can operate on. That is, we are assuming an underlying Distributed Hash Table (DHT) in which we keep track of ‘trust identifiers’ and relate them to an RDF document describing the relationship in greater detail. This document contains a number of ‘trust shards’. In the current version, these are public keys owned by individuals partaking in the relationship. Their primary use is to act as a lookup mechanism to retrieve the relationships somebody is part of.
-
-> **Comment:** In the ideal case, we would not have any trust shards in the first place. This is still a way to address individuals which is exactly what we are trying to avoid. If we do not have any identifiers owned by users, we lack a way to talk about membership. This means we can not stop people from claiming they are part of a trust relationship when they are not, and there is no way to revoke their ability to use the trust identifier. This is discussed furter in the subsection on ‘Trust Shards’.
-
-In the second part we discuss the protocol itself, and the syntax and semantics of the messages that will be exchanged between users. This is supposed to provide enough information to implement a working version of the protcol using your technology of choice.
+Following this explanation we discuss the protocol itself, and the syntax and semantics of the
+messages that will be exchanged between users. This description is supposed to provide enough
+information to implement a working version of the protocol using your technology of choice.
 
 ## System Model
 
-Bit of Trust is designed to operate in distributed systems without a centralised coordinating server, sometimes called peer-to-peer systems or decentralised systems. For a brief explanation of the intuition behind this we refer to [A Brief introduction to (De)centralised Software Systems](https://gist.github.com/tbaccaer/fb3b687581d56b030baefe253c19fbc8). The protocol requires a number of requirements from the system in order to operate.
+Bit of Trust requires a way to store trust descriptions (RDF documents) identified
+by trust identifiers. As mentioned before, this really lends itself well to a
+(distributed) hash table approach. Ideally, a distributed implementation should meet the following
+requirements:
 
-1. The maximal route length between two servers is `O(log(n))` where `n` represents the number of nodes in the system.
+1. The maximal route length between two servers is `O(log(n))` where `n` represents the number of
+   nodes in the system.
 2. The system is fault tolerant to a certain degree when servers fail, leave, and join.
 3. The system should be scalable enough to support thousands or millions of nodes.
 4. The nodes in the system collectively make up the system, without central coordination.
-5. We need a way to map keys to values, in this case we are mapping trust relationship identifiers to trust shards. We will explain these concepts in their respective sections.
+5. We need a way to map keys to values, in this case we are mapping trust identifiers
+   to trust descriptions. We will explain these concepts in their respective sections.
 
-This seems like a tall order, but most Distributed Hash Table (DHT) systems can satisfy these requirements. Examples include [Kademlia](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf), [Koorde](https://www.ic.unicamp.br/~celio/peer2peer/debrujin-p2p/kaashoek03koorde.pdf), [Chord](https://pdos.csail.mit.edu/papers/ton:chord/paper-ton.pdf), [Whanau](https://pdos.csail.mit.edu/papers/whanau-nsdi10.pdf), [Pastry](http://rowstron.azurewebsites.net/PAST/pastry.pdf), and [Tapestry](https://www.srhea.net/papers/tapestry_jsac.pdf).
+This seems like a tall order, but most Distributed Hash Table (DHT) systems can satisfy these
+requirements. Examples include
+[Kademlia](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf),
+[Koorde](https://www.ic.unicamp.br/~celio/peer2peer/debrujin-p2p/kaashoek03koorde.pdf),
+[Chord](https://pdos.csail.mit.edu/papers/ton:chord/paper-ton.pdf),
+[Whanau](https://pdos.csail.mit.edu/papers/whanau-nsdi10.pdf),
+[Pastry](http://rowstron.azurewebsites.net/PAST/pastry.pdf), and
+[Tapestry](https://www.srhea.net/papers/tapestry_jsac.pdf).
 
-Do note, we do not specify which algorithm or existing service is used here, it is completely up to the implementor to pick a specific technology such as [Hyperswarm](https://github.com/hyperswarm/hyperswarm) or [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) for their specific usecase. We are just declaring the environment we are expecting to work in.
+Do note, it may be best not to reinvent the wheel here. There are numerous systems readily
+available that implement a DHT with many problems typically faced in implementations already
+tackled. Examples of these include [Hyperswarm](https://github.com/hyperswarm/hyperswarm) or
+[libp2p](https://github.com/libp2p/js-libp2p).
 
 ### Hash Tables
 
-Hash tables operate by associating or mapping ‘keys’ to ‘values’ by use of a hash function. For example, if we want to map server names to `IPv4` addresses a typical hash table might look like this to us.
+Hash tables operate by associating or mapping ‘keys’ to ‘values’ by use of a hash function. For
+example, if we want to map names to file paths a typical hash table might look like
+this.
 
-| Key      | Value              |
-| -------- | ------------------ |
-| Brussels | `129.138.111.255`  |
-| Ghent    | `152.55.236.11`    |
-| Hasselt  | `18.136.158.247`   |
-| Mons     | `77.221.211.14`    |
-| Namur    | `240.252.88.246`   |
+| Key      | Value                |
+| -------- | -------------------- |
+| Brussels | `/data/brussels.ttl` |
+| Ghent    | `/data/ghent.ttl`    |
+| Hasselt  | `/data/hasselt.ttl`  |
+| Mons     | `/data/mons.ttl`     |
+| Namur    | `/data/namur.ttl`    |
 
-However, it is implemented like a contigiuous region of memory in which we calculate the position of a value based on its key. Hash functions are one-way functions that allow you to calculate a (nearly) unique same-length number for each piece of data you can think of. If we calculate the `crc32` hash of `Brussels` we get `h('Brussels') = 8b5c2f3b`. This number can be used to index into an array (region of memory) at the location where we are storing the value accompanying this specific key.
+However, it is implemented like a contiguous region of memory in which we calculate the position
+of a value based on its key. Hash functions are one-way functions that allow you to calculate a
+(nearly) unique same-length number for each piece of data you can think of. If we calculate the
+`crc32` hash of `Brussels` we get `h('Brussels') = 8b5c2f3b`. This number can be used to index into
+an array (region of memory) at the location where we are storing the value accompanying this
+specific key.
 
 ### Distributed Hash Tables (DHTs)
-The idea behind distributed hash tables is that we can distribute this table over multiple machines, without using a central coordinator. Most DHT systems need to specify the following things in order to operate.
-1. Specify a shared ‘keyspace’ for both servers and values. That is, what is the finite set of keys that we can map to? (e.g. all numbers from 0 to 15 million)
-2. Connect servers in the network to each other in such a way that each server can be reached using a bounded number of lookups.
+The idea behind distributed hash tables is that we can distribute this table over multiple
+machines, without using a central coordinator. Most DHT systems need to specify the following
+things in order to operate.
+1. Specify a shared ‘key space’ for both servers and values. That is, what is the finite set of keys
+   that we can map to? (e.g. all numbers from 0 to 15 million)
+2. Connect servers in the network to each other in such a way that each server can be reached using
+   a bounded number of lookups.
 3. Develop a strategy to map items to certain servers inside of the network.
 4. Deal with ways to let systems join and leave at will, without losing data.
 
-In the interest of brevity, we will not tread into detail how DHTs are implemented here, as this would warrant the size of a book chapter or research paper. A good place to start is the [Chord paper](https://pdos.csail.mit.edu/papers/ton:chord/paper-ton.pdf), as this is the easiest one to understand.
-
-### Storage Model
-
-The hash table approximately looks like the table below, where the keys are trust relationships and the trust shards are stored inside a document.
-
-| Key                                      | Value            |
-| ---------------------------------------- | ---------------- |
-| a2ca2c385c0a3542a668afdcf76df54ec73d9a28 | `a2ca2c385.json` |
-
-The file `a2ca2c385.json` looks like this:
-
-```json
-{
-    "trust-relationship-id": "a2ca2c385c0a3542a668afdcf76df54ec73d9a28",
-    "members": [
-        "MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHOW59RNlahdDht7F5an8ZI6Ik/AHPPyKkVWCHzR+c9djlabD7U3/128h28NQYtXW0TkXuLeg0FLsEqM99TAyibz6dpPbNH3JyWLl8zlY1AFRy57zBzA07k8YhN7zBLPDiiHlS61UoV6aXJuPkbqawdcKwdi5vX6pYkSFlKTTpcDAgMBAAE=",
-        "MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgGWKvTO10snnoBIKr0eELCRuhUjNaPihNTDShut3cajBpYxfGkVKjsP5bBY4NJuKacq5kGrWEQ7m0T+cHSeEAzD3a4xH7ymlka5WAAro02cguTYsm3V+c7+oxePd5mQeKGOhtrMIKA/Pgwr8Pd9pdV1y/svhD7a2FlfPAa+YogsjAgMBAAE="       
-    ]
-}
-```
-
-### Trust Shards
-
-Trust shards are the basic pieces of information used to enter trust relationships. They are based on asymmetric cryptography (see [QR challenge-response](/qr-challenge-response.md)). Each user generates a random private key and derives a public key from it. The public key is used as their trust shard on the network.
-
-Users are indirectly responsible for the safe-guarding of their private key, both from attackers and from being lost, and for distributing it across their devices. The private key and associated responsibilities should however not be visible to the user, and should be fully handled and hidden by the BoT application instead.
-
-Note that a trust shard (or a private key) *alone* does not contain or point to any personally identifiable information (PII).
-
-TODO: elaborate further
+In the interest of brevity, we will not tread into detail on how DHTs are implemented, as this
+would warrant the size of a book chapter or research paper. A good place to start is the [Chord
+paper](https://pdos.csail.mit.edu/papers/ton:chord/paper-ton.pdf), as this is arguably the most
+accessible.
 
 ### Trust Identifiers
 
-Trust relationships are relationships between a group of at least two trust shards. A trust shard is introduced to the network by setting up a trust relationship with an existing member.
+Trust identifiers are the foundation of the Bit of Trust protocol, they provide an identifier for a
+given trust relationship between certain actors. These identifiers are typically created by
+combining other trust identifiers. As such, there is also a way to bootstrap these identifiers
+which is described in the protocol section.
 
-Each relationship can be identified by a hash of two concatenated hashes, each of which being either the identifier of an existing trust relationship (a hash of a subtree), or the hash of a trust shard.
+Trust identifiers are built up like [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree),
+which means they are created in the following way:
 
-They are thus structured as a Merkle tree, with hashes of trust shards in the leaf nodes.
+1. Assume two existing trust identifiers, these are [Blake2b-256](https://blake2.net/) hashes. For
+   example, a [base64](https://en.wikipedia.org/wiki/Base64) encoded hash looks like this:
+   `MLlGLgfmwWDxAnoeqYVyGvMNReedVQ41aDGICKqjzPg=`. To keep the description short we will call these
+   hashes `A` and `B`.
+2. We concatenate hash `A` and `B`, denoted by `A || B`.
+3. We take the [Blake2b-256](https://blake2.net) hash of the concatenation like this: `h(A || B)`.
+4. This resulting hash is the new trust identifier for the relationship between the trust
+   identifiers `A` and `B`.
 
-Using hashes as identifiers makes it possible to identify (point at, talk about, ...) one's latest known version (generation) of a whole tree without each node needing to store the whole tree.
+Each of these trust identifiers has an accompanying RDF document in the hash table. These documents
+encode a [directed acyclic graph (DAG)](https://en.wikipedia.org/wiki/Directed_acyclic_graph)
+describing all of the previous hashes (subtrees) that were used in the creation of this identifier.
+The leaves of the Merkle tree are what we call ‘Trust shards’, and are required for the
+bootstrapping process. Note that the amount of actors in a trust relationship can be determined by
+counting how many trust shards a trust identifier has (i.e. counting the leaves of the Merkle
+tree).
 
-The hash function to be used is BLAKE2b-256, a cryptographic hash function.
+### Trust Shards
 
-TODO: elaborate further
+Trust shards are the ‘shards’ of a trust identifier, they each constitute a part of the
+relationship that can be handed out to actors who are a part of the relationship being represented.
+A close analogy is that of owning shares of a company, except the company is a trust relationship
+and the shares are not necessarily traded for money.
 
-### Context
+Owning a trust shard of a given trust relationship enables an actor to invite new actors into the
+trust relationship. It should also be possible for this actor to remove other shard holders from
+the system through a majority vote, but the exact mechanism for this is still an **open problem**.
 
-Human relationships can mean different things to different people. For example, Alice might want to connect with Bob in the context of friendship, but Bob only considers Alice an acquaintance.
+We currently represent trust shards by use of asymmetric cryptography (see [QR
+challenge-response](/qr-challenge-response.md)), the public key of the trust shard is used as the
+building block in trust identifiers, and the owner of the shard has the accompanying private key.
+We do this to prevent people from claiming ownership of a shard, when they do not own it. It is
+still an **open problem** whether we can remove the use of asymmetric cryptography in favour of a
+different method of proving ownership.
 
-Because of this inherent ambiguity, no trust relationship in the system is tied to any specific context.
+Another **open problem** is to come up with a method for exchanging trust shards between different
+actors, that is, move the trust shard from one owner to another owner. As well as enabling users to
+give up their shard when they no longer wish to be a part of a trust relationship.
 
-TODO: elaborate further
+The last **open problem** we consider is how users can prove ownership of a shard from any
+computing device they wish to use. This is an affordance provided by current username and password
+systems that we wish to support as well, but it is still unsure to which degree this would be
+possible without making people remember things. This is a potentially big part of being user
+friendly, in this same vein, this also means that any use of asymmetric cryptography should be
+invisible to actors using the system (i.e. they do not need to know how to operate a terminal to
+generate and store keys), and it should be impossible to identify actors through the public key of
+their trust shard.
+
+### Trust Descriptions
+
+As of now, a trust description is an RDF document in which we keep track of (or refer to) the
+trust identifiers or trust shards that make up a relationship. It is currently still an **open
+problem** what the exact structure of these documents will be, and what data they will keep
+track of. One possible addition to this document could be a description of the context in which a
+relationship takes place, or it could contain references to other resources on the web that the
+trust relationship owns, such as a video or a document.
+
+The validity according to our future specification will be enforced by use of
+[SHACL](https://www.w3.org/TR/shacl/), and we will provide machine-interpretable semantics by use
+of a [RDFS vocabulary](https://www.w3.org/TR/rdf-schema/) or [OWL
+ontology](https://www.w3.org/TR/owl2-overview/), which is yet to be decided upon.
 
 ## Protocol
 
+```
 TODO
+```
