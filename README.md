@@ -107,18 +107,18 @@ which means they are created in the following way:
    example, a [base64](https://en.wikipedia.org/wiki/Base64) encoded hash looks like this:
    `MLlGLgfmwWDxAnoeqYVyGvMNReedVQ41aDGICKqjzPg=`. To keep the description short we will call these
    hashes `A` and `B`.
-2. We concatenate hash `A` and `B`, denoted by `A || B`.
-3. We take the [Blake2b-256](https://blake2.net) hash of the concatenation like this: `h(A || B)`.
+2. Sort the hashes `A` and `B`, so we get `H1` and `H2` where `H1 < H2`.
+2. We concatenate hash `H1` and `H2`, denoted by `H1 || H2`.
+3. We take the [Blake2b-256](https://blake2.net) hash of the concatenation like this: `h(H1 || H2)`.
 4. This resulting hash is the new trust identifier for the relationship between the trust
    identifiers `A` and `B`.
 
 Each of these trust identifiers has an accompanying RDF document in the hash table. These documents
-encode a [directed acyclic graph (DAG)](https://en.wikipedia.org/wiki/Directed_acyclic_graph)
-describing all of the previous hashes (subtrees) that were used in the creation of this identifier.
-The leaves of the Merkle tree are what we call ‘Trust shards’, and are required for the
-bootstrapping process. Note that the amount of actors in a trust relationship can be determined by
-counting how many trust shards a trust identifier has (i.e. counting the leaves of the Merkle
-tree).
+encode a binary tree describing all of the previous hashes (subtrees) that were used in the
+creation of this identifier. The leaves of the Merkle tree are what we call ‘Trust shards’, and are
+required for the bootstrapping process. Note that the amount of actors in a trust relationship can
+be determined by counting how many trust shards a trust identifier has (i.e. counting the leaves of
+the Merkle tree).
 
 ### Trust Shards
 
