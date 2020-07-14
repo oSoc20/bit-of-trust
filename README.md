@@ -1,3 +1,5 @@
+![Bit of Trust](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/bot.png)
+
 # Bit of Trust (BoT) Protocol
 
 **Disclaimer** - **This file is a draft, nothing written here is final or represents an end
