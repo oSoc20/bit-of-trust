@@ -151,9 +151,17 @@ their trust shard.
 
 ### Trust Descriptions
 
-```
-TODO
-```
+As of now, a trust description is an RDF document in which we keep track of (or refer to) the
+trust identifiers or trust shards that make up a relationship. It is currently still an **open
+problem** what the exact structure of these documents will be, and what data they will keep
+track of. One possible addition to this document could be a description of the context in which a
+relationship takes place, or it could contain references to other resources on the web that the
+trust relationship owns, such as a video or a document.
+
+The validity according to our future specification will be enforced by use of
+[SHACL](https://www.w3.org/TR/shacl/), and we will provide machine-interpretable semantics by use
+of a [RDFS vocabulary](https://www.w3.org/TR/rdf-schema/) or [OWL
+ontology](https://www.w3.org/TR/owl2-overview/), which is yet to be decided upon.
 
 ## Protocol
 
