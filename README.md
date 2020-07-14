@@ -73,7 +73,7 @@ The file `a2ca2c385.json` looks like this:
 
 ### Trust Shards
 
-Trust shards are the basic pieces of information used to enter trust relationships. They are based on asymmetric cryptography (TODO: clarify). Each user generates a random private key and derives a public key from it. The public key is used as their trust shard on the network.
+Trust shards are the basic pieces of information used to enter trust relationships. They are based on asymmetric cryptography (see [QR challenge-response](/qr-challenge-response.md)). Each user generates a random private key and derives a public key from it. The public key is used as their trust shard on the network.
 
 Users are indirectly responsible for the safe-guarding of their private key, both from attackers and from being lost, and for distributing it across their devices. The private key and associated responsibilities should however not be visible to the user, and should be fully handled and hidden by the BoT application instead.
 
