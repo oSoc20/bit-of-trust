@@ -6,11 +6,11 @@
 
 The BoT protocol attempts to build identifiers based on the relationships between people. This means the focus is no longer on the individuals in the system. An example of this in a current system is your handle on Twitter, which is a unique identifier on their platform. Instead, the BoT protocol focusses on relationships. For instance, Bob and Alice can declare that they are friends, and to the system they could be known as `bob-and-alice`, however there are no identifiers for the individuals Bob or Alice on their own. 
 
-> **Comment:** In the current description of the protocol, this does not exclude the use of individual identifiers as an implementation detail, but these are never public facing or addressable. See the subsection on ‘Device Identifiers’ for more details.
+> **Comment:** In the current description of the protocol, this does not exclude the use of individual identifiers as an implementation detail, but these are never public facing or addressable. See the subsection on ‘Trust Shards’ for more details.
 
-We first discuss the system model that this protocol can operate on. That is, we are assuming an underlying Distributed Hash Table (DHT) in which we keep track of ‘trust identifiers’ and relate them to an RDF document describing the relationship in greater detail. This document contains a number of ‘device identifiers’. In the current version, these are public keys owned by individuals partaking in the relationship. Their primary use is to act as a lookup mechanism to retrieve the relationships somebody is part of. A secondary use, is their ability to act as a way to prove ownership over your device.
+We first discuss the system model that this protocol can operate on. That is, we are assuming an underlying Distributed Hash Table (DHT) in which we keep track of ‘trust identifiers’ and relate them to an RDF document describing the relationship in greater detail. This document contains a number of ‘trust shards’. In the current version, these are public keys owned by individuals partaking in the relationship. Their primary use is to act as a lookup mechanism to retrieve the relationships somebody is part of.
 
-> **Comment:** In the ideal case, we would not have any device identifiers in the first place. This is still a way to address individuals which is exactly what we are trying to avoid. If we do not have any device identifiers, we lack a way to talk about membership. This means we can not stop people from claiming they are part of a trust relationship when they are not, and there is no way to revoke their ability to use the trust identifier. This is discussed furter in the subsection on ‘Device Identifiers’.
+> **Comment:** In the ideal case, we would not have any trust shards in the first place. This is still a way to address individuals which is exactly what we are trying to avoid. If we do not have any identifiers owned by users, we lack a way to talk about membership. This means we can not stop people from claiming they are part of a trust relationship when they are not, and there is no way to revoke their ability to use the trust identifier. This is discussed furter in the subsection on ‘Trust Shards’.
 
 In the second part we discuss the protocol itself, and the syntax and semantics of the messages that will be exchanged between users. This is supposed to provide enough information to implement a working version of the protcol using your technology of choice.
 
@@ -22,7 +22,7 @@ Bit of Trust is designed to operate in distributed systems without a centralised
 2. The system is fault tolerant to a certain degree when servers fail, leave, and join.
 3. The system should be scalable enough to support thousands or millions of nodes.
 4. The nodes in the system collectively make up the system, without central coordination.
-5. We need a way to map keys to values, in this case we are mapping trust relationship identifiers to device identifiers. We will explain these concepts in their respective sections.
+5. We need a way to map keys to values, in this case we are mapping trust relationship identifiers to trust shards. We will explain these concepts in their respective sections.
 
 This seems like a tall order, but most Distributed Hash Table (DHT) systems can satisfy these requirements. Examples include [Kademlia](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf), [Koorde](https://www.ic.unicamp.br/~celio/peer2peer/debrujin-p2p/kaashoek03koorde.pdf), [Chord](https://pdos.csail.mit.edu/papers/ton:chord/paper-ton.pdf), [Whanau](https://pdos.csail.mit.edu/papers/whanau-nsdi10.pdf), [Pastry](http://rowstron.azurewebsites.net/PAST/pastry.pdf), and [Tapestry](https://www.srhea.net/papers/tapestry_jsac.pdf).
 
@@ -53,7 +53,7 @@ In the interest of brevity, we will not tread into detail how DHTs are implement
 
 ### Storage Model
 
-The hash table approximately looks like the table below, where the keys are trust relationships and the device identifiers are stored inside a document.
+The hash table approximately looks like the table below, where the keys are trust relationships and the trust shards are stored inside a document.
 
 | Key                                      | Value            |
 | ---------------------------------------- | ---------------- |
@@ -71,25 +71,25 @@ The file `a2ca2c385.json` looks like this:
 }
 ```
 
-### Device Identifiers
+### Trust Shards
 
-Device identifiers are based on asymmetric cryptography (more specifically: ECC?). Each user generates a random private key and derives a public key from it. The public key is used as their 'device identifier' on the network. They can use their private key to prove ownership of their public key.
+Trust shards are the basic pieces of information used to enter trust relationships. They are based on asymmetric cryptography (TODO: clarify). Each user generates a random private key and derives a public key from it. The public key is used as their trust shard on the network.
 
-Users are responsible for the safe-guarding of their private key, both from attackers and from being lost, and for distributing it across their devices.
+Users are indirectly responsible for the safe-guarding of their private key, both from attackers and from being lost, and for distributing it across their devices. The private key and associated responsibilities should however not be visible to the user, and should be fully handled and hidden by the BoT application instead.
 
-Note that a public (or private) key *alone* does not contain or point to any personally identifiable information (PII).
+Note that a trust shard (or a private key) *alone* does not contain or point to any personally identifiable information (PII).
 
 TODO: elaborate further
 
 ### Trust Identifiers
 
-Trust relationships are relationships between a group of at least two 'devices'. A device is introduced to the network by setting up a trust relationship with an existing member.
+Trust relationships are relationships between a group of at least two trust shards. A trust shard is introduced to the network by setting up a trust relationship with an existing member.
 
-Each relationship can be identified by a hash of two concatenated hashes, each of which being either the identifier of an existing trust relationship (a hash of a subtree), or the hash of a device identifier.
+Each relationship can be identified by a hash of two concatenated hashes, each of which being either the identifier of an existing trust relationship (a hash of a subtree), or the hash of a trust shard.
 
-They are thus structured as a Merkle tree, with hashes of device identifiers in the leaf nodes.
+They are thus structured as a Merkle tree, with hashes of trust shards in the leaf nodes.
 
-Using hashes as identifiers makes it possible to identify (point at, talk about, ...) one's latest known version (generation) of a whole tree without each device needing to store the whole tree.
+Using hashes as identifiers makes it possible to identify (point at, talk about, ...) one's latest known version (generation) of a whole tree without each node needing to store the whole tree.
 
 The hash function to be used is BLAKE2b-256, a cryptographic hash function.
 
