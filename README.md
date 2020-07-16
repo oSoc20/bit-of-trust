@@ -1,63 +1,149 @@
 ![Bit of Trust](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/bot.png)
 
-# Bit of Trust (BoT) Protocol
+# Bit of Trust
 
-**Disclaimer** - **This file is a draft, nothing written here is final or represents an end
-product.**
+**This document discribes the technical viewpoint and insights we gained during our work within
+Open Summer of Code 2020. We make an attempt at defining core concepts that could serve as system
+primitives. Additionally, we provide a list of open problems that could serve as potential avenues
+for more research at a later point in time.**
 
 ## Introduction
 
-The BoT protocol attempts to build identifiers based on the relationships between people. This
-means the focus is no longer on the individuals in the system. An example of this in a current
-system is your handle on Twitter, which is a unique identifier on their platform. Instead, the BoT
-protocol focusses on relationships. For instance, Bob and Alice can declare that they are friends,
-and to the system they could be known as `bob-and-alice`, however there are no identifiers for the
-individuals Bob or Alice on their own.
+To us, the students, Bit of Trust attempts to build identifiers based on the relationships between
+people or organisations. This means the focus is no longer on the individuals in the system. An
+example of this in a current system is your handle on Twitter, which is a unique identifier on
+their platform. Instead, Bit of Trust focusses on relationships. For instance, Bob and Alice
+can declare that they are friends, and to the system they could be known as `@bob-alice`,
+however there are no identifiers for the individuals Bob or Alice, such as `@bob` or `@alice`. This
+allows us to make explicit some of the implicit trust relationships that are currently being made
+online. For example, when you store files on Google Drive, you are in an implicit trust
+relationship with Google, and any files you store on Google Drive belong both to you and to
+Google. They also derive information about what you like from these files and expose you as a
+potential customer to an unkown amount of advertisers that you never know about.
 
-We start with a discussion of the system model behind this protocol, that means we will describe
-the data we store, and how we store it. The fundamental part of this system are relations, they are
-stored in [RDF](https://www.w3.org/TR/rdf-primer/) documents since they are extensible and allow us
-to define machine-interpretable semantics. We can access these RDF documents by associating them
-with a trust identifier, which represents a handle for a given relationship. A natural way to store
-mappings is a hash table, but this limits the scalability of the system to a single machine and we
-need much more scalability. Therefore we can opt for a Decentralised Hash Table (DHT) instead, this
-has the added benefit of reducing the amount of centralised components in the system.
+We think this will create more awareness about who actually owns data, and we think that this model
+more closely approaches the way humans think about trust. For example, in a normal human
+conversations, you know who is a part of the interaction. You also know the information being
+exchanged and who knows this information. In the digital world, this is not necessarily true, many
+people are not aware that information they exchange with websites is also being shared with
+trackers or companies.
 
-Following this explanation we discuss the protocol itself, and the syntax and semantics of the
-messages that will be exchanged between users. This description is supposed to provide enough
-information to implement a working version of the protocol using your technology of choice.
+The rest of this document discusses some aspects or building blocks that can be used in a technical
+implementation, and outlines some potential problems for further technically oriented research.
+Bit of Trust is still very broadly defined and most previous definition efforts have been
+vision-oriented. We make an attempt at translating some of this vision into actionable technical
+research problems that could be investigated.
 
-## System Model
+## Core Concepts
 
-Bit of Trust requires a way to store trust descriptions (RDF documents) identified
-by trust identifiers. As mentioned before, this really lends itself well to a
-(distributed) hash table approach. Ideally, a distributed implementation should meet the following
-requirements:
+In our version of Bit of Trust, we require a way to store descriptions or information about trust
+relationships, we sometimes call them ‘trust bubbles’. We think that storing these descriptions
+as an RDF file could prove to be interesting for a number of reasons.
 
-1. The maximal route length between two servers is `O(log(n))` where `n` represents the number of
-   nodes in the system.
-2. The system is fault tolerant to a certain degree when servers fail, leave, and join.
-3. The system should be scalable enough to support thousands or millions of nodes.
-4. The nodes in the system collectively make up the system, without central coordination.
-5. We need a way to map keys to values, in this case we are mapping trust identifiers
-   to trust descriptions. We will explain these concepts in their respective sections.
+- Descriptions will be extendible with references or statements about anything on the Web.
+- We can make use of existing query languages like
+  [SPARQL](https://www.w3.org/TR/rdf-sparql-query/) in order to make these descriptions queryable.
+- There are powerful tools available to enforce the structure of this description, such as
+  [SHACL](https://www.w3.org/TR/shacl/).
+- We can make the meaning (semantics) of the data explicit and machine-interpretable, which
+  improves interoperability with other systems.
 
-This seems like a tall order, but most Distributed Hash Table (DHT) systems can satisfy these
-requirements. Examples include
+In order to talk about these trust descriptions, we need to refer to them through a trust
+identifier. A typical way to associate two values with each other is through use of a hash table.
+But since these are usually confined to single machines, we need a way to distribute this hash
+table. Examples of distributed hash tables include
 [Kademlia](https://pdos.csail.mit.edu/~petar/papers/maymounkov-kademlia-lncs.pdf),
 [Koorde](https://www.ic.unicamp.br/~celio/peer2peer/debrujin-p2p/kaashoek03koorde.pdf),
 [Chord](https://pdos.csail.mit.edu/papers/ton:chord/paper-ton.pdf),
 [Whanau](https://pdos.csail.mit.edu/papers/whanau-nsdi10.pdf),
 [Pastry](http://rowstron.azurewebsites.net/PAST/pastry.pdf), and
-[Tapestry](https://www.srhea.net/papers/tapestry_jsac.pdf).
+[Tapestry](https://www.srhea.net/papers/tapestry_jsac.pdf). Do note, it may be best not to reinvent
+the wheel here. There are numerous systems readily available that implement a DHT with many
+problems typically faced in implementations already tackled. Examples of these include
+[Hyperswarm](https://github.com/hyperswarm/hyperswarm) or
+[libp2p](https://github.com/libp2p/js-libp2p) which contains primitives for peer-to-peer
+systems. If this were to be implemented in a distributed, but not necessarily peer-to-peer
+environment then a document store is also a valid option.
 
-Do note, it may be best not to reinvent the wheel here. There are numerous systems readily
-available that implement a DHT with many problems typically faced in implementations already
-tackled. Examples of these include [Hyperswarm](https://github.com/hyperswarm/hyperswarm) or
-[libp2p](https://github.com/libp2p/js-libp2p).
+The last piece of the puzzle is a way to signify that people or organisations (henceforth called
+actors) are a part of a given relationship, without necessarily creating a personal identifier for
+them. Our solution to this is the concept of a trust shard. These are parts of a trust identifier
+that actors who are part of a given relationship own. This allows them to influence the trust
+relationship, such as inviting or removing actors. These shards should be seen as interchangeable
+tokens, and should in no way identifiy a person, kind of like a membership card, but without this
+necessarily identifying the actor in question.
+
+### Trust Identifiers
+
+Trust identifiers are the foundation of Bit of Trust, they provide an identifier for a
+given trust relationship between certain actors. They are typically created by combining other
+trust identifiers. As such, there is also a way to bootstrap these identifiers, which we handle
+through trust shards.
+
+Trust identifiers are built up like [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree),
+which means they are created in the following way:
+
+1. Assume two existing trust identifiers, these are [Blake2b-256](https://blake2.net/) hashes. For
+   example, a [base64](https://en.wikipedia.org/wiki/Base64) encoded hash looks like this:
+   `MLlGLgfmwWDxAnoeqYVyGvMNReedVQ41aDGICKqjzPg=`. To keep the description short we will call these
+   hashes `A` and `B`.
+2. Sort the hashes `A` and `B`, so we get `H1` and `H2` where `H1 < H2`.
+2. We concatenate hash `H1` and `H2`, denoted by `H1 || H2`.
+3. We take the [Blake2b-256](https://blake2.net) hash of the concatenation like this: `h(H1 || H2)`.
+4. This resulting hash is the new trust identifier for the relationship between the trust
+   identifiers `A` and `B`.
+
+What we mean by ‘bootstrapping’ here is that the leaves of this merkle tree are infact the trust
+shards, and all the subtrees inbetween are trust identifiers. One of the requirements for trust
+descriptions should be that they keep track of the previous two trust relationships making up the
+current trust relationship.
+
+### Trust Shards
+
+Trust shards are the ‘shards’ of a trust identifier, they each constitute a part of the
+relationship that can be handed out to actors who are a part of the relationship being represented.
+A close analogy is that of owning shares of a company, except the company is a trust relationship
+and the shares are not necessarily traded for money.
+
+Owning a trust shard of a given trust relationship enables an actor to add or remove actors from
+the trust relationship. Just like being a shareholder means you can participate in board meetings
+and make changes. However, the fundamental difference is that there is no notion of somebody having
+more shares than someone else, everyone has an equal share in the relationship, and this also means
+equal power.
+
+### Trust Descriptions
+
+As of now, a trust description is an RDF document in which we keep track of (or refer to) the
+trust identifiers or trust shards that make up a relationship. It is currently still an open
+problem what the exact structure of these documents will be, and what data they will keep
+track of. One possible addition to this document could be a description of the context in which a
+relationship takes place, or it could contain references to other resources on the web that the
+trust relationship owns, such as a video or a document.
+
+The validity according to a given specification can be enforced by use of
+[SHACL](https://www.w3.org/TR/shacl/), and we could provide machine-interpretable semantics by use
+of a [RDFS vocabulary](https://www.w3.org/TR/rdf-schema/) or [OWL
+ontology](https://www.w3.org/TR/owl2-overview/).
+
+## Research Problems
+
+| Problem                        | Description                                            |
+| ------------------------------ | ------------------------------------------------------ |
+| 1: Trust Shards                | [1-trust-shards.md](/problems/1-trust-shards.md)       |
+| 2: Trust Shard Exchange        | [2-trust-shard-ex.md](/problems/2-trust-shard-ex.md)   |
+| 3: Trust Shard User Experience | [3-trust-shard-ux.md](/problems/3-trust-shard-ux.md)   |
+| 4: Trust Shard Capabilities    | [4-trust-shard-cap.md](/problems/4-trust-shard-cap.md) |
+| 5: Trust Descriptions          | [5-trust-descr.md](/problems/5-trust-description.md)   |
+| 6: Security & Law Complicance  | [6-sec-and-law.md](/problems/6-sec-and-law.md)         |
+
+You can make a pull request if you wish to add more problems to this list.
+
+## Appendix
+
+This section contains some brief explanations and pointers towards resources to learn more about
+concepts used in the main portion of the text.
 
 ### Hash Tables
-
 Hash tables operate by associating or mapping ‘keys’ to ‘values’ by use of a hash function. For
 example, if we want to map names to file paths a typical hash table might look like
 this.
@@ -93,80 +179,3 @@ would warrant the size of a book chapter or research paper. A good place to star
 paper](https://pdos.csail.mit.edu/papers/ton:chord/paper-ton.pdf), as this is arguably the most
 accessible.
 
-### Trust Identifiers
-
-Trust identifiers are the foundation of the Bit of Trust protocol, they provide an identifier for a
-given trust relationship between certain actors. These identifiers are typically created by
-combining other trust identifiers. As such, there is also a way to bootstrap these identifiers
-which is described in the protocol section.
-
-Trust identifiers are built up like [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree),
-which means they are created in the following way:
-
-1. Assume two existing trust identifiers, these are [Blake2b-256](https://blake2.net/) hashes. For
-   example, a [base64](https://en.wikipedia.org/wiki/Base64) encoded hash looks like this:
-   `MLlGLgfmwWDxAnoeqYVyGvMNReedVQ41aDGICKqjzPg=`. To keep the description short we will call these
-   hashes `A` and `B`.
-2. Sort the hashes `A` and `B`, so we get `H1` and `H2` where `H1 < H2`.
-2. We concatenate hash `H1` and `H2`, denoted by `H1 || H2`.
-3. We take the [Blake2b-256](https://blake2.net) hash of the concatenation like this: `h(H1 || H2)`.
-4. This resulting hash is the new trust identifier for the relationship between the trust
-   identifiers `A` and `B`.
-
-Each of these trust identifiers has an accompanying RDF document in the hash table. These documents
-encode a binary tree describing all of the previous hashes (subtrees) that were used in the
-creation of this identifier. The leaves of the Merkle tree are what we call ‘Trust shards’, and are
-required for the bootstrapping process. Note that the amount of actors in a trust relationship can
-be determined by counting how many trust shards a trust identifier has (i.e. counting the leaves of
-the Merkle tree).
-
-### Trust Shards
-
-Trust shards are the ‘shards’ of a trust identifier, they each constitute a part of the
-relationship that can be handed out to actors who are a part of the relationship being represented.
-A close analogy is that of owning shares of a company, except the company is a trust relationship
-and the shares are not necessarily traded for money.
-
-Owning a trust shard of a given trust relationship enables an actor to invite new actors into the
-trust relationship. It should also be possible for this actor to remove other shard holders from
-the system through a majority vote, but the exact mechanism for this is still an **open problem**.
-
-We currently represent trust shards by use of asymmetric cryptography (see [QR
-challenge-response](/qr-challenge-response.md)), the public key of the trust shard is used as the
-building block in trust identifiers, and the owner of the shard has the accompanying private key.
-We do this to prevent people from claiming ownership of a shard, when they do not own it. It is
-still an **open problem** whether we can remove the use of asymmetric cryptography in favour of a
-different method of proving ownership.
-
-Another **open problem** is to come up with a method for exchanging trust shards between different
-actors, that is, move the trust shard from one owner to another owner. As well as enabling users to
-give up their shard when they no longer wish to be a part of a trust relationship.
-
-The last **open problem** we consider is how users can prove ownership of a shard from any
-computing device they wish to use. This is an affordance provided by current username and password
-systems that we wish to support as well, but it is still unsure to which degree this would be
-possible without making people remember things. This is a potentially big part of being user
-friendly, in this same vein, this also means that any use of asymmetric cryptography should be
-invisible to actors using the system (i.e. they do not need to know how to operate a terminal to
-generate and store keys), and it should be impossible to identify actors through the public key of
-their trust shard.
-
-### Trust Descriptions
-
-As of now, a trust description is an RDF document in which we keep track of (or refer to) the
-trust identifiers or trust shards that make up a relationship. It is currently still an **open
-problem** what the exact structure of these documents will be, and what data they will keep
-track of. One possible addition to this document could be a description of the context in which a
-relationship takes place, or it could contain references to other resources on the web that the
-trust relationship owns, such as a video or a document.
-
-The validity according to our future specification will be enforced by use of
-[SHACL](https://www.w3.org/TR/shacl/), and we will provide machine-interpretable semantics by use
-of a [RDFS vocabulary](https://www.w3.org/TR/rdf-schema/) or [OWL
-ontology](https://www.w3.org/TR/owl2-overview/), which is yet to be decided upon.
-
-## Protocol
-
-```
-TODO
-```
