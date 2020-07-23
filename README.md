@@ -95,8 +95,8 @@ In the digital world, this is not necessarily true, many people are not aware th
 exchange with websites is also being shared with trackers or companies. When you store files on
 Google Drive, you are in an implicit trust relationship with Google, and any files you store on
 Google Drive belong both to you and to Google. They also derive information about what you like
-from these files and expose you as a potential customer to an unkown amount of advertisers that you
-never know about.
+from these files and expose you as a potential customer to an unknown amount of advertisers that
+you never know about.
 
 In order to really turn this story into something engaging, we think that it still lacks some way
 to easily explain how we will achieve this explicitness. Of course, this seems to be dependent on
@@ -107,11 +107,80 @@ data. These are some potential explanations, but they remain rather vague.
 
 ## **Naming**: How can we refer to relationships?
 
-`<Description>`
+In order to talk about relationships digitally, it would be useful if we have a way to talk about
+them. That is, we have a need to identify or refer to a given relationship. Though, there are a few
+points we have to keep in mind when doing this.
+
+- The name **can not personally identify** any member of the relationship.
+- It should be **human-readable**, that is, do not expect users to remember long hashes along the
+  lines of `a8e9bd0f4df60ed5246a1b1f53d51a1feaeb1315266f769ac218436f12fda830`.
+- Identifiers should be built **recursively**, this essentially equates to being able to use the
+  name of a relationship to construct another name for the aggregate of these two relationships.
+
+We should prevent personal identification for privacy reasons. Human readability is important
+because people are accustomed to referring to a ‘handle’ they use on a given platform. This makes
+it easier to share and refer to the relationship.
 
 ### What have we tried? What went wrong?
 
+#### Can we represent names by hashes?
+
+One potential model for naming users came from our idea of ‘Trust Identifiers’ which is based on
+the idea of a [Merkle tree](https://en.wikipedia.org/wiki/Merkle_tree). Since we want names to
+support being built ‘recursively’, this seemed like a natural fit at first.
+
+We briefly explain how the process of building a name using Merkle trees could work:
+1. Assume two existing relationships, these are represented by hashes. For example, an encoded hash
+   looks like this: `5a80571818aee6f7fe7b800179d0b905eb6595f4`. To keep the description short
+   we will call these hashes `A` and `B`.
+2. Sort the hashes `A` and `B`, so we get `H1` and `H2` where `H1 < H2`.
+3. We concatenate hash `H1` and `H2`, denoted by `H1 || H2`.
+4. We take the hash of the concatenation like this: `h(H1 || H2)`.
+5. This resulting hash is the new name for the relationship between the relationships `A` and `B`.
+
+While this approach prevents personal identification, and manages to allow for recursive
+construction, there are some problems with this approach:
+
+1. Hashes are not human readable
+2. There is a **bootstrapping** problem, what are the leaves of the Merkle tree?.
+
+#### Can we represent names by random words?
+
+Another model, is to name trust relationships through a random list of nouns and adjectives. For
+example, a name could look like `6-sad-squid-snuggle-softly` or `8-mad-orcs-stomp-loudly`. This
+idea comes from an [Asana blogpost](https://blog.asana.com/2011/09/6-sad-squid-snuggle-softly/) and
+some accompanying npm libraries such as [Greg](https://github.com/linus/greg/) and
+[human-readable-ids-js](https://www.npmjs.com/package/human-readable-ids).
+
+There are also a number of problems here:
+
+1. The name space depends on the used naming scheme, which means that we could run into a
+   scalability issue later down the line.
+2. This method does not recursively construct the name.
+
+#### Why not let users pick their own name?
+
+A critical reader may note that most platforms online today let users pick their own names or
+handles. The reason why this does not work here, is because we want to prevent users from exposing
+their personal identity through their relationship naming. For instance, if Alice and Bob want to
+create a digital relationship, they could choose to call their relationship `Alice-Bob`. This would
+expose both of their personal identities. A relationship name should only be meaningful to the
+people inside the relationship, and not to the outside world.
+
 ### What are potential next steps?
+
+#### Improving upon the hashing approach
+
+Hashes not being human readable may be overcome with some form of reference system, which is
+similar to [what Git does](https://git-scm.com/book/en/v2/Git-Internals-Git-References). 
+
+#### Improving upon the random words approach
+
+`<TODO>`
+
+#### Looking for more alternatives
+
+`<TODO>`
 
 ## **Onboarding**: How are relationships established?
 
@@ -125,4 +194,11 @@ data. These are some potential explanations, but they remain rather vague.
 
 ### What are potential next steps?
 
+## **Capabilities**: What are people able to do with a relationship?
 
+- Members outside of the trust relationship **can not derive the personal identity**
+  of someone inside.
+
+### What have we tried? What went wrong?
+
+### What are potential next steps?
