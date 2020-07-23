@@ -25,7 +25,7 @@ There is a shortcoming with the two previous approaches, which is their reliance
 owned and identified by individuals. In practice, there is also data that belongs to a
 relationship. An example of this is a university degree, which is a document established between an
 individual and a university. Of course, you could write your own degree but its value comes from
-someone you trust to be credible vouching for your abilities. Addittionally, if data is in a shared
+someone you trust to be credible vouching for your abilities. Additionally, if data is in a shared
 data pod, how can you trust that this data is correct? How can you see who is using your data?
 
 Bit of Trust is what you get when relationships form the core of a system. In order to make
@@ -172,7 +172,28 @@ people inside the relationship, and not to the outside world.
 #### Improving upon the hashing approach
 
 Hashes not being human readable may be overcome with some form of reference system, which is
-similar to [what Git does](https://git-scm.com/book/en/v2/Git-Internals-Git-References). 
+similar to [what Git does](https://git-scm.com/book/en/v2/Git-Internals-Git-References). The
+bootstrapping problem is a rather large issue though. One of our ideas was to use our concept of
+‘trust shards’ to represent the leaves of the Merkle tree. These would be implemented using
+asymmetric cryptography, that is, the public key would be the leaf, and the private key would be
+held by the owner of the shard. The main idea being, we needed a way to prove that somebody owns a
+leaf of the Merkle tree.
+
+We envisioned this mechanism as a sort of challenge-response mechanism, whereby a peer in the
+network can ask a holder of a trust shard to prove that they actually own it. This mechanism would
+work as follows:
+
+1. The peer presents a ‘question’ or ‘challenge’ and encrypts it using the shard's public key, so only
+   the holder of the shard's private key would be able to read the challenge.
+2. The holder receives this message and decrypts it using their private key.
+3. The holder solves the challenge and (assuming a secure connection) sends the answer to the
+   challenge back to peer.
+4. The holder has now proven that they own the shard.
+
+This idea is based on [challenge-response
+authentication](https://en.wikipedia.org/wiki/Challenge%E2%80%93response_authentication). There may
+be different avenues to explore here. The essence is that we need some form of token that can serve
+as a bootstrap from which the rest of the Merkle tree can be built.
 
 #### Improving upon the random words approach
 
@@ -184,21 +205,40 @@ similar to [what Git does](https://git-scm.com/book/en/v2/Git-Internals-Git-Refe
 
 ## **Onboarding**: How are relationships established?
 
+`<TODO>`
+
 ### What have we tried? What went wrong?
 
+`<TODO>`
+
 ### What are potential next steps?
+
+`<TODO>`
 
 ## **Evolution**: How do relationships evolve over time?
 
+`<TODO>`
+
 ### What have we tried? What went wrong?
+
+`<TODO>`
 
 ### What are potential next steps?
 
+`<TODO>`
+
 ## **Capabilities**: What are people able to do with a relationship?
+
+`<TODO>`
 
 - Members outside of the trust relationship **can not derive the personal identity**
   of someone inside.
 
 ### What have we tried? What went wrong?
 
+`<TODO>`
+
 ### What are potential next steps?
+
+`<TODO>`
+
