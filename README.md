@@ -14,7 +14,7 @@ companies.
 
 There are systems like MIT's [SOLID](https://solid.mit.edu/) that propose the idea of personal
 data vault. This would mean that your personal data is stored in a location that you fully control,
-and companies wishing to provide you a service, query you for the data they wish to use. There is
+and companies wanting to provide you a service query you for the data they wish to use. There is
 access control which means that you get to decide who gets to use the data. Another approach to
 this are peer-to-peer filesystems like [Hypercore](https://hypercore-protocol.org/), and
 [IPFS](https://ipfs.io/). Each user has a number of drives in which they can put their data, and
@@ -25,7 +25,8 @@ There is a shortcoming with the two previous approaches, which is their reliance
 owned and identified by individuals. In practice, there is also data that belongs to a
 relationship. An example of this is a university degree, which is a document established between an
 individual and a university. Of course, you could write your own degree but its value comes from
-someone you trust to be credible vouching for your abilities.
+someone you trust to be credible vouching for your abilities. Addittionally, if data is in a shared
+data pod, how can you trust that this data is correct? How can you see who is using your data?
 
 Bit of Trust is what you get when relationships form the core of a system. In order to make
 progress we wanted to gain a better understanding, explore the problem, and work on communication
@@ -49,7 +50,7 @@ here:
 Having spent close to a month on this project, we realise this is a very tall order. But, in order
 to motivate more people to work on the project, this is a really valuable challenge to resolve.
 
-### What have we tried?
+### What have we tried? What went wrong?
 
 Weekly pitching sessions are a part of Open Summer of Code. These are about one minute blocks of
 time that each team has to communicate their project, their progress, and what they have learned to
@@ -75,20 +76,53 @@ description. Of course, it is already clear that this terminology hints at a cer
 choice, which pinpoints one of the difficulties about this challenge. It is hard to explain
 something at a high-level, without keeping in mind possible implementations.
 
-`TODO: Include pitch video by Finlay`
+One of the use cases we used to pitch the project was about identity recovery. In most online
+systems, forgetting your password means you have to ask the website you are authenticating against
+to send you a ‘recovery email’. This will allow you to choose a new password. But, what if you also
+forget the password of your personal email? With Bit of Trust we could model what happens in a
+non-digital environment. Some people leave a spare key with someone they trust, and you can ask
+this person to come and open the door for you. To translate this to a digital environment, we could
+authenticate someone based on the people they trust.
+
+`TODO: Include the Demo Day pitch video here`
 
 ### What are potential next steps?
 
---
+A potential story around Bit of Trust could be framing it as a mechanism for making implicit trust
+relationships more explicit. For example, in a normal human conversations, you know who is a part
+of the interaction. You also know the information being exchanged and who knows this information.
+In the digital world, this is not necessarily true, many people are not aware that information they
+exchange with websites is also being shared with trackers or companies. When you store files on
+Google Drive, you are in an implicit trust relationship with Google, and any files you store on
+Google Drive belong both to you and to Google. They also derive information about what you like
+from these files and expose you as a potential customer to an unkown amount of advertisers that you
+never know about.
+
+In order to really turn this story into something engaging, we think that it still lacks some way
+to easily explain how we will achieve this explicitness. Of course, this seems to be dependent on
+an implementation. One way would be to log access to the people interacting with the data, and note
+down their reason for accessing it. We could have some form of access control based on that, to
+prevent people from interacting, or we could allow the interaction and create a fork of the shared
+data. These are some potential explanations, but they remain rather vague.
 
 ## **Naming**: How can we refer to relationships?
 
---
+`<Description>`
+
+### What have we tried? What went wrong?
+
+### What are potential next steps?
 
 ## **Onboarding**: How are relationships established?
 
---
+### What have we tried? What went wrong?
+
+### What are potential next steps?
 
 ## **Evolution**: How do relationships evolve over time?
 
---
+### What have we tried? What went wrong?
+
+### What are potential next steps?
+
+
