@@ -103,6 +103,12 @@ down their reason for accessing it. We could have some form of access control ba
 prevent people from interacting, or we could allow the interaction and create a fork of the shared
 data. These are some potential explanations, but they remain rather vague.
 
+> **Note: Beyond this point, we discuss more possibly implementation-dependent information. It is
+> strongly advised to really figure out the story part first, as this has further implications on
+> what should and should not be implemented. Otherwise valuable time may be spent on implementation
+> details that do not even matter to realise the value set forth in the story behind Bit of
+> Trust.**
+
 ## **Naming**: How can we refer to relationships?
 
 In order to talk about relationships digitally, it would be useful if we have a way to talk about
@@ -181,8 +187,8 @@ We envisioned this mechanism as a sort of challenge-response mechanism, whereby 
 network can ask a holder of a trust shard to prove that they actually own it. This mechanism would
 work as follows:
 
-1. The peer presents a ‘question’ or ‘challenge’ and encrypts it using the shard's public key, so only
-   the holder of the shard's private key would be able to read the challenge.
+1. The peer presents a ‘question’ or ‘challenge’ and encrypts it using the shard's public key, so
+   only the holder of the shard's private key would be able to read the challenge.
 2. The holder receives this message and decrypts it using their private key.
 3. The holder solves the challenge and (assuming a secure connection) sends the answer to the
    challenge back to peer.
@@ -224,9 +230,81 @@ choosing. This is similar to what the decentralised social network
 
 ## **Onboarding**: How are relationships established?
 
-`<TODO>`
+Naming and onboarding are quite intimately connected, since the way relations are constructed
+should in some way give rise to the name, and the name should mean something to the members of the
+relationship. Therefore, it comes as no surprise that we have largely the same requirements.
+
+- The way in which a relationship is constructed should **not reveal any personal information**
+  during or after the process.
+- The way in which people establish a relationship should be **user friendly**. (i.e. keep the
+  process as short and as simple as possible)
 
 ### What have we tried? What went wrong?
+
+The way we envisioned the user-facing aspect of onboarding is by generating a link or a QR-code on
+one person's device. This person would subsequently share their QR-code or link with another
+person. When this user clicks on the link or scans the code, they will be asked to confirm being
+added to the trust relationship. We thought this would be the minimial interaction required.
+However, this still leaves us with a gap between the user facing interface, and its implementation.
+Therefore, we discuss two possible underlying implementations below in greater detail.
+
+#### Can we use asymmetric cryptography?
+
+We have tried two methods, the first being the usage of asymmetric cryptography. As mentioned in
+the section about naming, we would represent the trust relationship by its public key, and
+distribute the private keys among the members of the relationship. We could prove membership
+exactly like the challenge-response based authentication we mentioned earlier. The problem however,
+lies in establishing a shared key between all of the members of the relationship, without:
+
+1. Causing a performance problem.
+2. Storing public keys of users on the server, as this could be seen as information that could
+   potentially personally identify someone.
+
+One way shared keys are typically established is through some form of [Diffie-Hellman key
+exchange](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange). Which is a method for
+establishing a shared secret key over an untrusted communication channel. This could however
+introduce some slight performance problems, which I will briefly explain (feel free to skip the
+next two paragraphs if it goes over your head).
+
+There are two major performance costs to take into account here. The first being the work each
+system in the network has to do. And secondly, the communication cost, which is the cost of
+transferring messages over the network. When studying distributed systems, some researchers like to
+leave out the cost of systems themselves since the cost of transferring messages vastly trumps it
+in most cases. In any case, if we denote the number of participants in the relationship by `n`,
+then a naive circular arrangement of Diffie-Hellman key exchange with multiple parties would have a
+`O(n^2)` communication cost.
+
+**Proof** (Slightly hand-wavy). This can be seen by modelling the communication as a directed
+graph, where each node is a participant, and each directed edge is a message going from one user to
+another user. Because each user has to contact every other user at least once, this graph will be
+a complete digraph. Denote the number of participants by `n`. We know that the complete digraph
+will have `n * (n - 1)` directed edges, or messages. We can now determine that the communication
+cost is `O(n^2 - n) = O(n^2)`.
+
+This result is not necessarily show-stopping. But to put it in perspective, a relationship with
+about `100` people would have to send about `100^2 = 10 000` messages every time a new key has to
+be established, which is whenever someone joins or leaves (this also means that the public key
+changes every time someone joins or leaves). This is still a amount of messages that can be dealt
+with but it is far from ideal.
+
+Another way to do it, is by using two layers of asymmetric encryption. In this system, every time a
+new key needs to be generated, the users have to either retrieve the public keys of every user from
+some server, or exchange them with every participant at runtime. The communication cost here is
+`O(n)` where `n` is the number of participants, since everyone is sending a message to a single
+user doing the key generation. In the case where it is stored on a server, the cost is `O(1)`, but
+this is not desirable because public keys can be seen as personal information. The user who
+received all of the public keys of the participants will do the following:
+
+1. Generate a new asymmetric keypair that will be used by everyone.
+2. Encrypt the private key with the public keys of every participant in the trust relationship.
+3. Send all of these encrypted keys back to each of the participants.
+
+The communication cost here is already better than the Diffie-hellman case. However, we have to put
+major trust in the fact that the person generating the new keypair is not also sending this private
+key to other people who are not supposed to be part of the relationship.
+
+#### What about software tokens?
+
 
 `<TODO>`
 
