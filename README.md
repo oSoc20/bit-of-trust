@@ -328,7 +328,7 @@ of all existing tokens.
 
 The challenges here are mostly about making the process as simple as possible while making attacks
 hard. It is important that security is taken into account from the start in this process, since
-retrofitting it in as an aftertought is much harder. The main concerns are about maintaining
+retrofitting it in as an afterthought is much harder. The main concerns are about maintaining
 anonymity while preventing Sybil attacks. There have been efforts at tackling this problem before,
 such as [Advogato](https://en.wikipedia.org/wiki/Advogato#Trust_metric), which arguably did not
 entirely succeed in its efforts.
@@ -342,7 +342,30 @@ dealing with byzantine fault tolerance in distributed systems).
 
 ## **Evolution**: How do relationships evolve over time?
 
-`<TODO>`
+This challenge is about defining what happens when participants in a relationship get added or
+removed from the relationship. There are two mostly obvious ways to look at it, but this doesn't
+mean there may be other options. It comes down to what happens to the naming upon changes to the
+relationship:
+
+- Either, a relationship is made, and members joining and leaving have no impact on the name of the
+  relationship. That is, the relationship stays the same, it is just its members that are
+  interchangeable.
+- Or, members join and leave relationships, but these relationship names change as members are
+  removed or added. That is, the members stay the same, but the relationships are interchangeable.
+  The name can change at any time when the composition changes.
+
+Another point to consider is how participants in a relationship can remove someone else from the
+relationship. There are also two options we came across here:
+
+- Either, we allow anyone to remove anyone else at will. Doing so will create a new relationship
+  excluding the target, but only for the person who decided to remove the target. The other people
+  will remain in the original relationship until they decide to remove this person as well.
+- Or, we implement a system of majority voting in which people get removed from the relationship
+  when the majority thinks this is a good decision. There are no forks, relationships just move
+  from one state to the next state in which someone is no longer included.
+
+This could potentially include other actions, but this is discussed further in the section on
+‘capabilities’.
 
 ### What have we tried? What went wrong?
 
@@ -354,16 +377,15 @@ dealing with byzantine fault tolerance in distributed systems).
 
 ## **Capabilities**: What are people able to do with a relationship?
 
-`<TODO>`
+What are users allowed to do when they are in a relationship? As we discussed earlier, this should
+include a way to add or remove participants from the relationship. But what are the other things we
+should allow? At the least, there are a number of things we have to keep in mind:
 
 - Members outside of the trust relationship **can not derive the personal identity**
   of someone inside.
+- Relationships should always have a **minimum of two participants**. This means that we either
+  prevent users from leaving if the relationship has two members left, or the relationship
+  disappears as soon as one of the two users leaves the two-person relationship.
 
-### What have we tried? What went wrong?
-
-`<TODO>`
-
-### What are potential next steps?
-
-`<TODO>`
-
+This is very much still an open question, it really depends on which future applications the idea
+will solicit in the future.
