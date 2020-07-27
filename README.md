@@ -84,8 +84,6 @@ non-digital environment. Some people leave a spare key with someone they trust, 
 this person to come and open the door for you. To translate this to a digital environment, we could
 authenticate someone based on the people they trust.
 
-`TODO: Include the Demo Day pitch video here`
-
 ### What are potential next steps?
 
 A potential story around Bit of Trust could be framing it as a mechanism for making implicit trust
@@ -197,11 +195,32 @@ as a bootstrap from which the rest of the Merkle tree can be built.
 
 #### Improving upon the random words approach
 
-`<TODO>`
+We could make the random words approach better by using it as a layer on top of some method that
+does work recursively. This way we could take advantage of the human-readability. For instance, if
+we were to use the hash-based approach mentioned earlier, the challenge would be in mapping the
+hashes to a human-readable string. A suitable library that can do this, is called
+[codenamize](https://github.com/stemail23/codenamize-js). Do note, this works deterministically so
+it is best to use it on input that is already hashed in some way. If we were to use this method on
+bare user information such as an IP address, the process of mapping to a human-readable string
+could be reversed again, and we would expose personal information.
 
 #### Looking for more alternatives
 
-`<TODO>`
+Of course, these may not be the only ways to name trust relationships. We could also use
+[asymmetric cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography) in which the
+public key is used as the name for the relationship. The private keys would be held by the members
+of the group. This would cause a shared private key management problem, which we will discuss in
+greater detail in the section on the ‘onboarding’ challenge.
+
+Another potential avenue is to identify trust relationships based on domain names. This means that
+we accept the risk that people could personally identify themselves through their domain name
+choices. The downside is that domain names cost money, and we would have to ask people to buy 
+[whois protection](https://en.wikipedia.org/wiki/Domain_privacy) since their personal details would
+otherwise be open for all of the internet to see. Not only this, but the process of registering a
+domain name is not exactly user-friendly. A useful compromise would be to provide a handful of
+existing servers, hosted by users, with which other users can register a relationship name of their
+choosing. This is similar to what the decentralised social network
+[Mastodon](https://joinmastodon.org/) does, except that it is based on individual identifiers.
 
 ## **Onboarding**: How are relationships established?
 
