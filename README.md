@@ -400,7 +400,21 @@ approach.
 
 ### What are potential next steps?
 
-`<TODO>`
+It may be useful to look at existing decentralised identity protocols to see at what they are
+doing with regards to relationship evolution. For instance the [Jolocom
+protocol](https://jolocom.io/wp-content/uploads/2019/12/Jolocom-Whitepaper-v2.1-A-Decentralized-Open-Source-Solution-for-Digital-Identity-and-Access-Management.pdf)
+makes use of the ethereum blockchain and IPFS, but is implemented in a ledger agnostic way. They
+may have had to deal with much of the same problems with regards to version control of files or
+identities.
+
+Another approach is that of [BrightID](https://www.brightid.org/whitepaper) which keeps track of a
+log of actions to determine a given user's ‘health’. Which is a measure of trustworthiness of the
+identifier. This may be interesting to determine who can make lasting changes to the structure of a
+relationship and who can not.
+
+These two solutions remain useful to check out for other reasons as well. They faced quite a few of
+the same problems. The major difference is that both Jolocom and BrightID are focussed on the
+individual, just like most decentralised solutions around right now.
 
 ## **Capabilities**: What are people able to do with a relationship?
 
