@@ -369,7 +369,34 @@ This could potentially include other actions, but this is discussed further in t
 
 ### What have we tried? What went wrong?
 
-`<TODO>`
+#### Git-based relationships
+
+There are two major models we have considered when thinking about this challenge. The first being
+git-based relationships. If we structure relationships as a Merkle tree, we come close to the
+concept of git. In git, commits are connected through a directed acyclic graph, with each commit
+pointing to the previous commit. It could also happen that two different commits point to the same
+commit, which is a concept called branching. A possible way to implement revocation is therefore to
+create a new relationship where the invalid trust shard is no longer included, but pointing to the
+previous state of the trust relationship.
+
+However, the users within the trust relationship that do not decide to revoke the membership will
+still have a relationship including that person, but it will be branched off from the original. In
+essence we split the relationship into two distinct relationships each with or without the given
+trust shard, and pointing to the previous state.
+
+#### File system based relationships
+
+The other approach is thinking of relationships as more of a database or a file system. In this
+case we would have a single document in which we capture the participants. When changes occur,
+people will write to this single file and change the structure of the relationship for everyone
+else. Of course, this brings us to distributed consensus mechanisms again, which may require
+research in order to determine the best approach for this scenario, depending on how relationships
+are established.
+
+In this case, one person removing someone from the relation will impact the relationship for
+everybody else. So, it may be a better idea to implement a voting-based system if this were the
+case, where the individual control over relationships is supported better by the git-based
+approach.
 
 ### What are potential next steps?
 
@@ -387,5 +414,8 @@ should allow? At the least, there are a number of things we have to keep in mind
   prevent users from leaving if the relationship has two members left, or the relationship
   disappears as soon as one of the two users leaves the two-person relationship.
 
+### What are potential next steps?
+
 This is very much still an open question, it really depends on which future applications the idea
-will solicit in the future.
+will solicit in the future. It may be something interesting to define once there is a clear story
+behind what day-to-day value Bit of Trust wishes to provide.
