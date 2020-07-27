@@ -1,4 +1,4 @@
-![Bit of Trust](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/bot.png)
+![Banner](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/banner.png)
 
 # Bit of Trust
 
@@ -35,6 +35,8 @@ challenges. We briefly describe each challenge. For each of these, we discuss wh
 during Open Summer of Code, and provide some potential next steps or ideas to read into.
 
 ## Challenges
+
+![Story](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/story.png)
 
 ## **Story**: How do we make Bit of Trust explainable?
 
@@ -108,6 +110,8 @@ data. These are some potential explanations, but they remain rather vague.
 > what should and should not be implemented. Otherwise valuable time may be spent on implementation
 > details that do not even matter to realise the value set forth in the story behind Bit of
 > Trust.**
+
+![Naming](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/naming.png)
 
 ## **Naming**: How can we refer to relationships?
 
@@ -228,6 +232,8 @@ existing servers, hosted by users, with which other users can register a relatio
 choosing. This is similar to what the decentralised social network
 [Mastodon](https://joinmastodon.org/) does, except that it is based on individual identifiers.
 
+![Onboarding](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/onboarding.png)
+
 ## **Onboarding**: How are relationships established?
 
 Naming and onboarding are quite intimately connected, since the way relations are constructed
@@ -340,6 +346,8 @@ years. Methods such as proof of stake could prove useful to look into. In short,
 towards blockchain research since they have been dealing with problems similar in nature (i.e.
 dealing with byzantine fault tolerance in distributed systems).
 
+![Evolution](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/evolution.png)
+
 ## **Evolution**: How do relationships evolve over time?
 
 This challenge is about defining what happens when participants in a relationship get added or
@@ -416,6 +424,8 @@ These two solutions remain useful to check out for other reasons as well. They f
 the same problems. The major difference is that both Jolocom and BrightID are focussed on the
 individual, just like most decentralised solutions around right now.
 
+![Capabilities](https://raw.githubusercontent.com/oSoc20/bit-of-trust/master/img/capabilities.png)
+
 ## **Capabilities**: What are people able to do with a relationship?
 
 What are users allowed to do when they are in a relationship? As we discussed earlier, this should
@@ -433,3 +443,12 @@ should allow? At the least, there are a number of things we have to keep in mind
 This is very much still an open question, it really depends on which future applications the idea
 will solicit in the future. It may be something interesting to define once there is a clear story
 behind what day-to-day value Bit of Trust wishes to provide.
+
+## Attribution
+
+### Icons
+- Megaphone icon made by [Fasil](https://freeicons.io/profile/722) from
+  [www.freeicons.io](https://www.freeicons.io)
+- Other icons (besides Bit of Trust logo and Open Summer of Code logo) made by
+  [Freepik](https://www.flaticon.com/authors/freepik) from
+  [www.flaticon.com](https://www.flaticon.com)
