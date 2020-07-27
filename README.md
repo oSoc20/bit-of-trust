@@ -244,7 +244,7 @@ relationship. Therefore, it comes as no surprise that we have largely the same r
 The way we envisioned the user-facing aspect of onboarding is by generating a link or a QR-code on
 one person's device. This person would subsequently share their QR-code or link with another
 person. When this user clicks on the link or scans the code, they will be asked to confirm being
-added to the trust relationship. We thought this would be the minimial interaction required.
+added to the trust relationship. We thought this would be the minimal interaction required.
 However, this still leaves us with a gap between the user facing interface, and its implementation.
 Therefore, we discuss two possible underlying implementations below in greater detail.
 
@@ -295,18 +295,34 @@ user doing the key generation. In the case where it is stored on a server, the c
 this is not desirable because public keys can be seen as personal information. The user who
 received all of the public keys of the participants will do the following:
 
-1. Generate a new asymmetric keypair that will be used by everyone.
+1. Generate a new asymmetric key pair that will be used by everyone.
 2. Encrypt the private key with the public keys of every participant in the trust relationship.
 3. Send all of these encrypted keys back to each of the participants.
 
-The communication cost here is already better than the Diffie-hellman case. However, we have to put
-major trust in the fact that the person generating the new keypair is not also sending this private
+The communication cost here is already better than the Diffie-Hellman case. However, we have to put
+major trust in the fact that the person generating the new key pair is not also sending this private
 key to other people who are not supposed to be part of the relationship.
 
 #### What about software tokens?
 
+Another approach to represent membership would be to use a software token. This could be a string
+of random bytes, generated upon establishing the trust relationship. Each user gets their own
+random token, and the combination (such as hashing) of both random tokens gives rise to the name
+for the trust relationship. This way, the network would just consist of a bunch of random bytes,
+similar to asymmetric cryptography approach. The meaning of these random bytes is only apparent to
+the people who know of a given software token.
 
-`<TODO>`
+We do lose the property of being able to prove ownership compared to the asymmetric cryptography
+approach. A user could potentially copy one of these tokens from the server and act like they are a
+member in the relationship. This would leave us without any way to make sure if a user is who they
+say they are.
+
+Even worse, some automated script could copy all of the tokens from the server and
+start faking random operations on the entire network, basically rendering the entire system
+completely useless. This is somewhat similar to what is known as a
+[Sybil Attack](https://en.wikipedia.org/wiki/Sybil_attack), except that it is trivially easy to do.
+The attacker does not even need to create their own pseudonymous identities, they can just make use
+of all existing tokens.
 
 ### What are potential next steps?
 
