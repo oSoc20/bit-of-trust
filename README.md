@@ -326,7 +326,19 @@ of all existing tokens.
 
 ### What are potential next steps?
 
-`<TODO>`
+The challenges here are mostly about making the process as simple as possible while making attacks
+hard. It is important that security is taken into account from the start in this process, since
+retrofitting it in as an aftertought is much harder. The main concerns are about maintaining
+anonymity while preventing Sybil attacks. There have been efforts at tackling this problem before,
+such as [Advogato](https://en.wikipedia.org/wiki/Advogato#Trust_metric), which arguably did not
+entirely succeed in its efforts.
+
+Because we are essentially agreeing on who is a member of a trust relationship, and who is not, we
+could look at these problems under the light of consensus mechanisms. These are absolutely critical
+in blockchains, which have provided most of the last innovations in this area in the last few
+years. Methods such as proof of stake could prove useful to look into. In short, it pays to look
+towards blockchain research since they have been dealing with problems similar in nature (i.e.
+dealing with byzantine fault tolerance in distributed systems).
 
 ## **Evolution**: How do relationships evolve over time?
 
