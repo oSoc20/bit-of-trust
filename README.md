@@ -115,8 +115,8 @@ data. These are some potential explanations, but they remain rather vague.
 
 ## **Naming**: How can we refer to relationships?
 
-In order to talk about relationships digitally, it would be useful if we have a way to talk about
-them. That is, we have a need to identify or refer to a given relationship. Though, there are a few
+In order to talk about relationships digitally, it would be useful if we have a way to name them. 
+That is, we have a need to identify or refer to a given relationship. Though, there are a few
 points we have to keep in mind when doing this.
 
 - The name **can not personally identify** any member of the relationship.
